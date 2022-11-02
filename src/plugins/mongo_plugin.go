@@ -85,6 +85,7 @@ func (m *MongoVoterImpl) GetMasterInfo() (*core.NodeStatus, error) {
 	return item, nil
 }
 
+// master是旧主的id
 func (m *MongoVoterImpl) ElectMaster(master string) (*core.NodeStatus, error) {
 	now := time.Now().UnixMilli()
 
@@ -103,6 +104,7 @@ func (m *MongoVoterImpl) ElectMaster(master string) (*core.NodeStatus, error) {
 		return nil, err
 	}
 
+	//>0是修改成功，即能够找到旧主并且更新，表示在该操作之间没有旧主没有发生变化
 	if info.Updated > 0 {
 		log.Printf("master from %s ==> to %s", master, m.uuid)
 		return &core.NodeStatus{
@@ -110,6 +112,7 @@ func (m *MongoVoterImpl) ElectMaster(master string) (*core.NodeStatus, error) {
 			LatestHeartbeatTime: now,
 		}, nil
 	}
+	//如果旧主发生了变化则返回旧主
 	return m.GetMasterInfo()
 }
 
